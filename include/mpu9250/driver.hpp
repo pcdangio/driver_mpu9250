@@ -31,6 +31,7 @@ public:
     /// \brief Initializes the MPU9250.
     /// \param i2c_bus The I2C bus to communicate with the MPU9250 over.
     /// \param i2c_address The I2C address of the MPU9250.
+    /// \exception runtime_error if initialization fails.
     void initialize(uint32_t i2c_bus, uint32_t i2c_address);
     /// \brief Deinitializes the MPU9250.
     void deinitialize();
@@ -39,13 +40,16 @@ public:
     /// \brief Configures the MPU9250's gyroscope.
     /// \param fsr The desired full-scale range (FSR).
     /// \param dlpf_frequency The desired cut-off frequency of the digital low-pass filter (DLPF).
+    /// \exception runtime_error if configuration fails.
     void configure_gyro(configuration::gyro::fsr fsr, configuration::gyro::dlpf_frequency dlpf_frequency);
     /// \brief Configures the MPU9250's accelerometer.
     /// \param fsr The desired full-scale range (FSR).
     /// \param dlpf_frequency The desired cut-off frequency of the digital low-pass filter (DLPF).
+    /// \exception runtime_error if configuration fails.
     void configure_accel(configuration::accel::fsr fsr, configuration::accel::dlpf_frequency dlpf_frequency);
     /// \brief Configures the sample rate for the MPU9250.
     /// \param divider The divider to apply to the base clock. Sample rate = 1000Hz / (1 + divider).
+    /// \exception runtime_error if configuration fails.
     void configure_sample_rate(uint8_t divider);
 
     // MEASUREMENT
@@ -57,35 +61,43 @@ protected:
     /// \brief Initializes the I2C and GPIO interface of the driver.
     /// \param i2c_bus The I2C bus to interface with the MPU9250 over.
     /// \param i2c_address The I2C address of the MPU9250.
+    /// \exception runtime_error if initialization fails.
     virtual void initialize_i2c(uint32_t i2c_bus, uint32_t i2c_address) = 0;
     /// \brief Deinitialies the I2C interface of the driver.
+    /// \exception runtime_error if deinitialization fails.
     virtual void deinitialize_i2c() = 0;
     /// \brief Writes data to a register on the MPU9250.
     /// \param address The address of the register to write to.
     /// \param value The data to write to the register.
+    /// \exception runtime_error if write fails.
     virtual void write_mpu9250_register(registers::mpu9250 address, uint8_t value) = 0;
     /// \brief Reads data from a register on the MPU9250.
     /// \param address The address of the register to read from.
     /// \return The data from the register.
+    /// \exception runtime_error if read fails.
     virtual uint8_t read_mpu9250_register(registers::mpu9250 address) = 0;
     /// \brief Block reads data from several registers on the MPU9250.
-    /// \param address The starting register address of the block read.
-    /// \param n_bytes The number of bytes/registers to block read.
+    /// \param start_address The starting register address of the block read.
+    /// \param length The number of bytes/registers to block read.
     /// \param buffer The buffer to store the read data in.
-    virtual void read_mpu9250_registers(registers::mpu9250 address, uint32_t n_bytes, uint8_t* buffer) = 0;
+    /// \exception runtime_error if read fails.
+    virtual void read_mpu9250_registers(registers::mpu9250 start_address, uint32_t length, uint8_t* buffer) = 0;
     /// \brief Writes data to a register on the AK8963.
     /// \param address The address of the register to write to.
     /// \param value The data to write to the register.
+    /// \exception runtime_error if write fails.
     virtual void write_ak8963_register(registers::ak8963 address, uint8_t value) = 0;
     /// \brief Reads data from a register on the AK8963.
     /// \param address The address of the register to read from.
     /// \return The data from the register.
+    /// \exception runtime_error if read fails.
     virtual uint8_t read_ak8963_register(registers::ak8963 address) = 0;
     /// \brief Block reads data from several registers on the AK8963.
-    /// \param address The starting register address of the block read.
-    /// \param n_bytes The number of bytes/registers to block read.
+    /// \param start_address The starting register address of the block read.
+    /// \param length The number of bytes/registers to block read.
     /// \param buffer The buffer to store the read data in.
-    virtual void read_ak8963_registers(registers::ak8963 address, uint32_t n_bytes, uint8_t* buffer) = 0;
+    /// \exception runtime_error if read fails.
+    virtual void read_ak8963_registers(registers::ak8963 start_address, uint32_t length, uint8_t* buffer) = 0;
 
 private:
     // FSR
