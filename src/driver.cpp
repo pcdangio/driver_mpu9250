@@ -23,10 +23,10 @@ void driver::set_measurement_callback(std::function<void(measurement)> callback)
 }
 
 // INITIALIZATION
-void driver::initialize(uint32_t i2c_bus, uint32_t i2c_address, uint32_t interrupt_gpio_pin)
+void driver::initialize(uint32_t i2c_bus, uint32_t i2c_address)
 {
     // Initialize I2C.
-    initialize_i2c(i2c_bus, i2c_address, interrupt_gpio_pin);
+    initialize_i2c(i2c_bus, i2c_address);
 
     // Test MPU9250 communications.
     if(read_mpu9250_register(registers::mpu9250::WHO_AM_I) != 0x71)

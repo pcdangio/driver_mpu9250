@@ -31,8 +31,7 @@ public:
     /// \brief Initializes the MPU9250.
     /// \param i2c_bus The I2C bus to communicate with the MPU9250 over.
     /// \param i2c_address The I2C address of the MPU9250.
-    /// \param interrupt_gpio_pin The GPIO pin connected to the MPU9250's interrupt pin.
-    void initialize(uint32_t i2c_bus, uint32_t i2c_address, uint32_t interrupt_gpio_pin);
+    void initialize(uint32_t i2c_bus, uint32_t i2c_address);
     /// \brief Deinitializes the MPU9250.
     void deinitialize();
 
@@ -58,8 +57,7 @@ protected:
     /// \brief Initializes the I2C and GPIO interface of the driver.
     /// \param i2c_bus The I2C bus to interface with the MPU9250 over.
     /// \param i2c_address The I2C address of the MPU9250.
-    /// \param interrupt_gpio_pin The GPIO input pin that is connected to the MPU9250 interrupt pin.
-    virtual void initialize_i2c(uint32_t i2c_bus, uint32_t i2c_address, uint32_t interrupt_gpio_pin) = 0;
+    virtual void initialize_i2c(uint32_t i2c_bus, uint32_t i2c_address) = 0;
     /// \brief Deinitialies the I2C interface of the driver.
     virtual void deinitialize_i2c() = 0;
     /// \brief Writes data to a register on the MPU9250.
