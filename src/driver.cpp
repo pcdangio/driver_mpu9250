@@ -21,55 +21,33 @@ void driver::initialize(uint32_t i2c_bus, uint32_t i2c_address, uint32_t interru
     initialize_i2c(i2c_bus, i2c_address, interrupt_gpio_pin);
 
     // Test MPU9250 communications.
-    try
+    if(read_mpu9250_register(register_mpu9250::WHO_AM_I) != 0x71)
     {
-        if(read_mpu9250_register(register_mpu9250::WHO_AM_I) != 0x71)
-        {
-            throw std::runtime_error("connected device is not an mpu9250");
-        }
-    }
-    catch (std::exception& e)
-    {
-        throw std::runtime_error("mpu9250 communications failure (" + std::string(e.what()) + ")");
+        throw std::runtime_error("connected device is not an mpu9250");
     }
 
+    // Configure MPU9250.
     // Power on MPU9250 sensors and reset default settings.
     write_mpu9250_register(register_mpu9250::PWR_MGMT_1, 0x80);
-    
-    // Sleep for 50ms to let sensors come online and stabilize.
-    usleep(50000);
-
+    // Sleep for 100ms to let gyro PLL to stabilize before selecting it as clock source.
+    usleep(100000);
     // Change clock source to PLL from gyro.
-    // NOTE: Gyro PLL must be given time to stabilize after powering on.
     write_mpu9250_register(register_mpu9250::PWR_MGMT_1, 0x01);
-
-    
-
     // Set interrupt pin to latch, and enable I2C bypass mode for access to AK8963.
     write_mpu9250_register(driver::register_mpu9250::INT_BYP_CFG, 0x22);
     // Enable interrupt pin for raw data ready.
     write_mpu9250_register(driver::register_mpu9250::INT_ENABLE, 0x01);
 
     // Test AK8963 communications.
-    try
+    if(read_ak8963_register(register_ak8963::WHO_AM_I) != 0x48)
     {
-        if(read_ak8963_register(register_ak8963::WHO_AM_I) != 0x48)
-        {
-            throw std::runtime_error("connected device's magnetometer is not an ak8963");
-        }
-    }
-    catch (std::exception& e)
-    {
-        throw std::runtime_error("ak8963 communications failure (" + std::string(e.what()) + ")");
+        throw std::runtime_error("connected device does not have an ak8963");
     }
 
+    // Configure AK8963.
     // Power on magnetometer at 16bit resolution with 100Hz sample rate.
+    // NOTE: continuous mode 1 = 8Hz, 2 = 100Hz.
     write_ak8963_register(register_ak8963::CONTROL_1, 0x16);
-
-    // Set default settings for accelerometer and gyroscope.
-    driver::configure_accel(driver::accel_fsr::G_2, driver::accel_dlpf_frequency::F_218HZ);
-    driver::configure_gyro(driver::gyro_fsr::DPS_250, driver::gyro_dlpf_frequency::F_250HZ);
-
 }
 void driver::deinitialize()
 {
