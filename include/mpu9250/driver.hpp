@@ -15,7 +15,7 @@ public:
     /// \brief Enumerates the digital low-pass filter (DLPF) cutoff frequencies for the accelerometers.
     enum class accel_dlpf_frequency
     {
-        F_218HZ = 0x00,     ///< 218Hz cutoff frequency.
+        F_218HZ = 0x01,     ///< 218Hz cutoff frequency.
         F_99HZ = 0x02,      ///< 99Hz cutoff frequency.
         F_44HZ = 0x03,      ///< 44Hz cutoff frequency.
         F_21HZ = 0x04,      ///< 21Hz cutoff frequency.
@@ -25,7 +25,6 @@ public:
     /// \brief Enumerates the digital low-pass filter (DLPF) cutoff frequencies for the gyros.
     enum class gyro_dlpf_frequency
     {
-        F_250HZ = 0x00,     ///< 250Hz cutoff frequency.
         F_184HZ = 0x01,     ///< 184Hz cutoff frequency.
         F_92HZ = 0x02,      ///< 92Hz cutoff frequency.
         F_41HZ = 0x03,      ///< 41Hz cutoff frequency.
@@ -41,7 +40,7 @@ public:
         G_8 = 0x02,         ///< +/- 8g range.
         G_16 = 0x03         ///< +/- 16g range.
     };
-    /// \brief Enumerates the full scale ranges (FSR) available for the gyros in degress/second.
+    /// \brief Enumerates the full scale ranges (FSR) available for the gyros in degrees/second.
     enum class gyro_fsr
     {
         DPS_250 = 0x00,     ///< +/- 250 deg/sec range.
@@ -76,7 +75,11 @@ public:
         float temp;
     };
 
-    // CONFIGURATION
+    // CONSTRUCTORS
+    /// \brief Creates a new driver instance.
+    driver();
+
+    // CALLBACK
     /// \brief Attaches a callback to handle data when it becomes available.
     /// \param callback The callback function to execute.
     void set_data_callback(std::function<void(driver::data)> callback);
@@ -90,27 +93,18 @@ public:
     /// \brief Deinitializes the MPU9250.
     void deinitialize();
 
+    // CONFIGURATION
+    /// \brief Configures the MPU9250's gyroscope.
+    /// \param fsr The desired full-scale range (FSR).
+    /// \param dlpf_frequency The desired cut-off frequency of the digital low-pass filter (DLPF).
     void configure_gyro(gyro_fsr fsr, gyro_dlpf_frequency dlpf_frequency);
-    void configure_accel(accel_fsr fsr, accel_dlpf_frequency gyro_dlpf_frequency);
-
-    // PROPERTIES
-    /// \brief Sets the digital low-pass filter (DLPF) cutoff frequencies for the accelerometers and gyroscopes.
-    /// \param gyro_frequency The cut-off frequency for the gyroscopes and temperature sensor.
-    /// \param accel_frequency The cut-off frequency for the accelerometers.
-    /// \param max_sample_rate The maximum sample rate to use. Defaults to unlimited.
-    /// \returns The configured data sample rate (Hz)
-    /// \note The data rate is set to the nearest minimum value of lpf/2.5 or max_sample_rate.
-    float set_dlpf_frequencies(gyro_dlpf_frequency gyro_frequency, accel_dlpf_frequency accel_frequency, float max_sample_rate = 8000.0F);
-    /// \brief Sets the full scale range (FSR) of the gyroscopes.
-    /// \param fsr The FSR to set.
-    void set_gyro_fsr(gyro_fsr fsr);
-    /// \brief Sets the full scale range (FSR) of the accelerometers.
-    /// \param fsr The FSR to set.
-    void set_accel_fsr(accel_fsr fsr);
-
-    // METHODS
-    /// \brief Reads all IMU data directly from the MPU9250 and AK8963 and raises the data callback.
-    void read_data();
+    /// \brief Configures the MPU9250's accelerometer.
+    /// \param fsr The desired full-scale range (FSR).
+    /// \param dlpf_frequency The desired cut-off frequency of the digital low-pass filter (DLPF).
+    void configure_accel(accel_fsr fsr, accel_dlpf_frequency dlpf_frequency);
+    /// \brief Configures the sample rate for the MPU9250.
+    /// \param divider The divider to apply to the base clock. Sample rate = 1000Hz / (1 + divider).
+    void configure_sample_rate(uint8_t divider);
 
 protected:
     // ENUMERATIONS
@@ -157,7 +151,7 @@ protected:
         CONTROL_1 = 0x0A
     };
 
-    // METHODS
+    // I2C
     /// \brief Initializes the I2C and GPIO interface of the driver.
     /// \param i2c_bus The I2C bus to interface with the MPU9250 over.
     /// \param i2c_address The I2C address of the MPU9250.
@@ -165,7 +159,6 @@ protected:
     virtual void initialize_i2c(uint32_t i2c_bus, uint32_t i2c_address, uint32_t interrupt_gpio_pin) = 0;
     /// \brief Deinitialies the I2C interface of the driver.
     virtual void deinitialize_i2c() = 0;
-
     /// \brief Writes data to a register on the MPU9250.
     /// \param address The address of the register to write to.
     /// \param value The data to write to the register.
@@ -179,7 +172,6 @@ protected:
     /// \param n_bytes The number of bytes/registers to block read.
     /// \param buffer The buffer to store the read data in.
     virtual void read_mpu9250_registers(register_mpu9250 address, uint32_t n_bytes, uint8_t* buffer) = 0;
-
     /// \brief Writes data to a register on the AK8963.
     /// \param address The address of the register to write to.
     /// \param value The data to write to the register.
@@ -194,17 +186,32 @@ protected:
     /// \param buffer The buffer to store the read data in.
     virtual void read_ak8963_registers(register_ak8963 address, uint32_t n_bytes, uint8_t* buffer) = 0;
 
+    // ACCESS
+    /// \brief Reads all IMU data directly from the MPU9250 and AK8963 and raises the data callback.
+    void read_data();
+
 private:
-    // FULL SCALE RANGE
-    /// \brief m_gyro_fsr Stores the full scale range of the gyroscopes for ADC conversion.
-    float m_gyro_fsr;
-    /// \brief m_accel_fsr Stores the full scale range of the accelerometers for ADC conversion.
-    float m_accel_fsr;
+    // FSR
+    /// \brief Stores the current FSR of the accelerometer.
+    float m_fsr_accel;
+    /// \brief Stores the current FSR of the gyroscope.
+    float m_fsr_gyro;
 
     // CALLBACKS
     /// \brief m_data_callback The callback function to execute when IMU data is read.
     std::function<void(driver::data)> m_data_callback;
 
+    // SERIALIZATION
+    /// \brief Indicates if the system is little endian.
+    bool m_little_endian;
+    /// \brief Deserializes an int16 from a big-endian byte array.
+    /// \param bytes The big-endian byte array to read from.
+    /// \returns The deserialized int16.
+    int16_t deserialize_be(uint8_t* bytes) const;
+    /// \brief Deserializes an int16 from a little-endian byte array.
+    /// \param bytes The little-endian byte array to read from.
+    /// \returns The deserialized int16.
+    int16_t deserialize_le(uint8_t* bytes) const;
 };
 
 }
