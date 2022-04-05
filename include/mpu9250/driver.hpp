@@ -49,6 +49,10 @@ public:
     /// \param divider The divider to apply to the base clock. Sample rate = 1000Hz / (1 + divider).
     void configure_sample_rate(uint8_t divider);
 
+    // MEASUREMENT
+    /// \brief Reads the last measurement directly from the MPU9250 and AK8963 and raises the measurement callback.
+    void read_measurement();
+
 protected:
     // I2C
     /// \brief Initializes the I2C and GPIO interface of the driver.
@@ -84,10 +88,6 @@ protected:
     /// \param n_bytes The number of bytes/registers to block read.
     /// \param buffer The buffer to store the read data in.
     virtual void read_ak8963_registers(registers::ak8963 address, uint32_t n_bytes, uint8_t* buffer) = 0;
-
-    // ACCESS
-    /// \brief Reads the last measurement directly from the MPU9250 and AK8963 and raises the measurement callback.
-    void read_measurement();
 
 private:
     // FSR
