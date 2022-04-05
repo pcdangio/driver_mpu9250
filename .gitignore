@@ -1,2 +1,5 @@
 # Ignore build files.
 build/
+
+# Ignore documentation.
+doc/

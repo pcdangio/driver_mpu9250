@@ -5,6 +5,7 @@
 
 #include <functional>
 
+/// \brief Contains all code related to the MPU9250.
 namespace mpu9250 {
 
 /// \brief The base driver class for the MPU9250.
