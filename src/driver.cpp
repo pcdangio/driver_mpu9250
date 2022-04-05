@@ -150,22 +150,14 @@ void driver::configure_sample_rate(uint8_t divider)
 // METHODS
 void driver::read_data()
 {
-    // Burst read accel, temp, and gyro data.
+    // Burst read from the MPU9250.
+    // Create buffer for accel/temp/gyro data.
     uint8_t atg_buffer[14];
-    try
-    {
-        read_mpu9250_registers(driver::register_mpu9250::ACCEL_X_HIGH, 14, atg_buffer);
-    }
-    catch(const std::exception& e)
-    {
-        // Quit before callback. Do not report error in loop.
-        return;
-    }
-
-    // Burst read magnetometer data.
+    // Create buffer for magneto data.
     uint8_t magneto_buffer[7];
     try
     {
+        read_mpu9250_registers(driver::register_mpu9250::ACCEL_X_HIGH, 14, atg_buffer);
         read_ak8963_registers(driver::register_ak8963::X_LOW, 7, magneto_buffer);
     }
     catch(const std::exception& e)
@@ -184,8 +176,8 @@ void driver::read_data()
 
     // Parse out temperature data.
     // Formula is DegC = ((raw - roomtemp_offset)/temp_sensitivity) + 21
-    // Apparently, roomtemp_offset = 0, and temp sensitivty = 321
-    data.temp = static_cast<float>(driver::deserialize_be(&atg_buffer[6])) / 321.0f + 21.0f;
+    // From datasheet, roomtemp_offset = 0, temp_sensitivity = 333.87
+    data.temp = static_cast<float>(driver::deserialize_be(&atg_buffer[6])) / 333.87f + 21.0f;
     
     // Parse out gyro data.
     data.gyro_x = driver::m_fsr_gyro * static_cast<float>(driver::deserialize_be(&atg_buffer[8])) / 32767.0f;
