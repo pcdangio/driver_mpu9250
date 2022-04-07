@@ -10,6 +10,7 @@
 #include <mpu9250/measurement.hpp>
 
 #include <functional>
+#include <mutex>
 
 /// \brief Contains all code related to the MPU9250.
 namespace mpu9250 {
@@ -109,6 +110,8 @@ private:
     // CALLBACKS
     /// \brief The callback function to execute when a new measurement is read.
     std::function<void(measurement)> m_measurement_callback;
+    /// \brief Provides thread protection for the measurement callback.
+    std::mutex m_mutex_callback;
 
     // SERIALIZATION
     /// \brief Indicates if the system is little endian.

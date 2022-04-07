@@ -18,8 +18,14 @@ driver::driver()
 // CONFIGURATION
 void driver::set_measurement_callback(std::function<void(measurement)> callback)
 {
+    // Lock callback thread protection.
+    driver::m_mutex_callback.lock();
+
     // Store the callback.
     driver::m_measurement_callback = callback;
+
+    // Unlock callback thread protection.
+    driver::m_mutex_callback.unlock();
 }
 
 // INITIALIZATION
@@ -202,7 +208,15 @@ void driver::read_measurement()
     }
 
     // Initiate the measurement callback.
+
+    // Lock callback thread protection.
+    driver::m_mutex_callback.lock();
+
+    // Call callback.
     driver::m_measurement_callback(measurement);
+
+    // Unlock callback thread protection.
+    driver::m_mutex_callback.unlock();
 }
 
 // SERIALIZATION
