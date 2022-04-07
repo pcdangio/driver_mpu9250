@@ -48,7 +48,8 @@ void driver::initialize(uint32_t i2c_bus, uint32_t i2c_address)
     // Change clock source to PLL from gyro.
     write_mpu9250_register(registers::mpu9250::PWR_MGMT_1, 0x01);
     // Enable I2C bypass mode for access to AK8963.
-    write_mpu9250_register(registers::mpu9250::INT_BYP_CFG, 0x02);
+    // Instruct interrupt pin to latch until any read is performed.
+    write_mpu9250_register(registers::mpu9250::INT_BYP_CFG, 0x32);
     // Enable interrupt pin for raw data ready.
     write_mpu9250_register(registers::mpu9250::INT_ENABLE, 0x01);
 
