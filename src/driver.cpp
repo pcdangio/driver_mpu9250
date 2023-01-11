@@ -229,11 +229,11 @@ int16_t driver::deserialize_be(uint8_t* bytes) const
     // Check endianness.
     if(driver::m_little_endian)
     {
-        output = (bytes[0] << 8) | bytes[1];
+        output = (static_cast<int16_t>(bytes[0]) << 8) | static_cast<int16_t>(bytes[1]);
     }
     else
     {
-        output = (bytes[1] << 8) | bytes[0];
+        output = (static_cast<int16_t>(bytes[1]) << 8) | static_cast<int16_t>(bytes[0]);
     }
 
     return output;
@@ -246,11 +246,11 @@ int16_t driver::deserialize_le(uint8_t* bytes) const
     // Check endianness.
     if(driver::m_little_endian)
     {
-        output = (bytes[1] << 8) | bytes[0];
+        output = (static_cast<int16_t>(bytes[1]) << 8) | static_cast<int16_t>(bytes[0]);
     }
     else
     {
-        output = (bytes[0] << 8) | bytes[1];
+        output = (static_cast<int16_t>(bytes[0]) << 8) | static_cast<int16_t>(bytes[1]);
     }
 
     return output;
